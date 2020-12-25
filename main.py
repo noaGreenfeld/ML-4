@@ -9,6 +9,8 @@ from torchvision import transforms as tr
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets
 
+
+# todo change name of function and remove redundant print
 def print_hi(name):
     print(f'Hi, {name}')
     train_loader, val_loader = load()
@@ -61,33 +63,33 @@ def train(model, optimizer, train_loader):
         100. * correct / len(train_loader.dataset)))
 
 
-
 def load():
     train_x = np.loadtxt("train_x")
     train_y = np.loadtxt("train_y")
-    #split train file to validation and train:
+    # split train file to validation and train:
     size_train = int(len(train_x) * 0.2)
     validation_x = train_x[-size_train:, :]
     validation_y = train_y[-size_train:]
     train_x = train_x[: -size_train, :]
     train_y = train_y[: -size_train]
 
-    #todo - check the avg and change it
-    transforms= tr.Compose([tr.ToTensor(),
+    # todo - check the avg and change it
+    transforms = tr.Compose([tr.ToTensor(),
                             tr.Normalize((0.1307,), (0.3081,))])
-    #train data
-    train_data= FashionData(train_x, train_y, transforms)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle= True)
-    #validation data
-    validation_data= FashionData(validation_x, validation_y, transforms)
-    val_loader = torch.utils.data.DataLoader(validation_data,shuffle= True)
+    # train data
+    train_data = FashionData(train_x, train_y, transforms)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
+    # validation data
+    validation_data = FashionData(validation_x, validation_y, transforms)
+    val_loader = torch.utils.data.DataLoader(validation_data, shuffle=True)
     return train_loader, val_loader
+
 
 class FashionData(Dataset):
     def __init__(self, x, y, transforms):
-        self.x=x
-        self.y=y
-        self.transforms= transforms
+        self.x = x
+        self.y = y
+        self.transforms = transforms
 
     def __len__(self):
         return len(self.x)

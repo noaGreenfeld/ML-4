@@ -2,4 +2,5 @@ train_x
 train_y
 train_x_short
 train_y_short
+test_x
 venv
