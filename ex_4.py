@@ -30,8 +30,7 @@ def print_hi(name):
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-    loss_graphs(loss_train, loss_val)
-    acc_graphs(acc_train, acc_val)
+
     """
     # model B
     print("************B**************")
@@ -75,6 +74,20 @@ def print_hi(name):
         train(model, optimizer, train_loader)
         validate(model, val_loader)
     """
+    loss_graphs(loss_train, loss_val)
+    acc_graphs(acc_train, acc_val)
+
+    test_x = sys.argv[1]
+    test_x = np.loadtxt(test_x)
+    test_x /= 255.0
+    test_x = tr.Compose([tr.ToTensor()])(test_x)[0].float()
+    file = open("test_y", "w+")
+    for x in test_x:
+        y = model(x)
+        pred = y.max(1, keepdim=True)[1].item()
+        file.write(str(pred) + '\n')
+    file.close()
+
     print("done")
 
 
@@ -142,8 +155,8 @@ def train(model, optimizer, train_loader):
 
 
 def load():
-    train_x = np.loadtxt("train_x_short")
-    train_y = np.loadtxt("train_y_short")
+    train_x = np.loadtxt("train_x")
+    train_y = np.loadtxt("train_y")
     # split train file to validation and train:
     size_train = int(len(train_x) * 0.2)
     validation_x = train_x[-size_train:, :]
