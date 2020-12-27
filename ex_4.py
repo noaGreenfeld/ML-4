@@ -13,15 +13,14 @@ from torchvision import datasets
 
 
 # todo change name of function and remove redundant print
-def print_hi(name):
-    print(f'Hi, {name}')
+def main():
     train_loader, val_loader = load()
     loss_train = {}
     loss_val = {}
     acc_train = {}
     acc_val = {}
     # todo add loss average
-
+    """
     #modelA
     print("************A**************")
     model = ModelA(28*28)
@@ -31,7 +30,7 @@ def print_hi(name):
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
 
-    """
+    
     # model B
     print("************B**************")
     model = ModelB(28 * 28)
@@ -40,14 +39,16 @@ def print_hi(name):
         print(e)
         train(model, optimizer, train_loader)
         validate(model, val_loader)
+        """
     #modelC
     print("************C**************")
     model = ModelC(28*28)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
-        train(model, optimizer, train_loader)
-        validate(model, val_loader)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+        """
     # modelD
     print("************D**************")
     model = ModelD(28 * 28)
@@ -309,5 +310,5 @@ class ModelF(nn.Module):
         self.drop_layer(x)
         return F.log_softmax(x, dim=1)
 
-if __name__ == '__main__':
-    print_hi('noaaaaa')
+if __name__ == "__main__":
+    main()
