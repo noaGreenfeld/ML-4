@@ -1,4 +1,6 @@
 import sys
+import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerLine2D
 import numpy as np
 import torch
 import torch.nn as nn
@@ -14,16 +16,23 @@ from torchvision import datasets
 def print_hi(name):
     print(f'Hi, {name}')
     train_loader, val_loader = load()
+    loss_train = {}
+    loss_val = {}
+    acc_train = {}
+    acc_val = {}
     # todo add loss average
-    """
+
     #modelA
     print("************A**************")
     model = ModelA(28*28)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
-        train(model, optimizer, train_loader)
-        validate(model, val_loader)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+    loss_graphs(loss_train, loss_val)
+    acc_graphs(acc_train, acc_val)
+    """
     # model B
     print("************B**************")
     model = ModelB(28 * 28)
@@ -56,7 +65,7 @@ def print_hi(name):
         print(e)
         train(model, optimizer, train_loader)
         validate(model, val_loader)
-    """
+    
     # modelF
     print("************F**************")
     model = ModelF(28 * 28)
@@ -65,8 +74,27 @@ def print_hi(name):
         print(e)
         train(model, optimizer, train_loader)
         validate(model, val_loader)
-
+    """
     print("done")
+
+
+def loss_graphs(avg_train_loss, avg_validation_loss):
+    line1, = plt.plot(list(avg_train_loss.keys()), list(avg_train_loss.values()), "blue",
+                      label='Train average Loss')
+    line2, = plt.plot(list(avg_validation_loss.keys()), list(avg_validation_loss.values()), "red",
+                      label='Validation average Loss')
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=4), line2: HandlerLine2D(numpoints=4)})
+    plt.show()
+
+def acc_graphs(avg_acc_train, avg_acc_validation):
+    line1, = plt.plot(list(avg_acc_train.keys()), list(avg_acc_train.values()), "blue",
+                      label='Train average Accuracy')
+    line2, = plt.plot(list(avg_acc_validation.keys()), list(avg_acc_validation.values()), "red",
+                      label='Validation average Accuracy')
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=4), line2: HandlerLine2D(numpoints=4)})
+    plt.show()
+
+
 def validate(model, val_loader):
     model.eval()
     correct=0
@@ -75,13 +103,15 @@ def validate(model, val_loader):
     for data, labels in (val_loader):
         labels = labels.type(torch.LongTensor)
         output = model(data)
-        loss += F.nll_loss(output, labels)
+        train_loss += F.nll_loss(output, labels)
         pred = output.max(1, keepdim=True)[1]
         correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
     train_loss /= (len(val_loader.dataset))
+    acc = 100. * correct / len(val_loader.dataset)
     print('\nval set: Average loss: {:.4f}, Accuracy: {} / {}({:.0f} % )\n'.format(
     train_loss, correct, len(val_loader.dataset),
     100. * correct / len(val_loader.dataset)))
+    return  train_loss, acc
 
 def train(model, optimizer, train_loader):
         sum_loss = 0
@@ -98,17 +128,22 @@ def train(model, optimizer, train_loader):
             loss.backward()
             optimizer.step()
             #chek our train
-            sum_loss+=loss
+            train_loss+=loss
             pred =output.max(1, keepdim=True)[1]
             correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
-        train_loss /= (len(train_loader.dataset))
+
+        train_loss /= (len(train_loader))
+        acc= 100. * correct / len(train_loader.dataset)
+
         print('\nTest set: Average loss: {:.4f}, Accuracy: {} / {}({:.0f} % )\n'.format(
         train_loss, correct, len(train_loader.dataset),
         100. * correct / len(train_loader.dataset)))
+        return train_loss, acc
+
 
 def load():
-    train_x = np.loadtxt("train_x")
-    train_y = np.loadtxt("train_y")
+    train_x = np.loadtxt("train_x_short")
+    train_y = np.loadtxt("train_y_short")
     # split train file to validation and train:
     size_train = int(len(train_x) * 0.2)
     validation_x = train_x[-size_train:, :]
