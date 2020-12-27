@@ -14,10 +14,20 @@ from torchvision import datasets
 def print_hi(name):
     print(f'Hi, {name}')
     train_loader, val_loader = load()
+    # todo add loss average
+    """
     #modelA
     print("************A**************")
     model = ModelA(28*28)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        train(model, optimizer, train_loader)
+        validate(model, val_loader)
+    # model B
+    print("************B**************")
+    model = ModelB(28 * 28)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
         train(model, optimizer, train_loader)
@@ -30,10 +40,27 @@ def print_hi(name):
         print(e)
         train(model, optimizer, train_loader)
         validate(model, val_loader)
+    # modelD
+    print("************D**************")
+    model = ModelD(28 * 28)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        train(model, optimizer, train_loader)
+        validate(model, val_loader)
     #modelE
     print("************E**************")
     model = ModelE(28*28)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+    for e in range(10):
+        print(e)
+        train(model, optimizer, train_loader)
+        validate(model, val_loader)
+    """
+    # modelF
+    print("************F**************")
+    model = ModelF(28 * 28)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
         train(model, optimizer, train_loader)
@@ -147,7 +174,7 @@ class ModelB(nn.Module):
         x = x.view(-1, self.image_size)
         x = F.relu(self.fc0(x))
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = (self.fc2(x))
         return F.log_softmax(x, dim=1)
 
 class ModelC(nn.Module):
@@ -166,6 +193,26 @@ class ModelC(nn.Module):
         x = (self.fc2(x))
         self.drop_layer(x)
         return F.log_softmax(x, dim=1)
+
+
+class ModelD(nn.Module):
+    def __init__(self, image_size):
+        super(ModelD, self).__init__()
+        self.image_size = image_size
+        self.fc0 = nn.Linear(image_size, 100)
+        self.bn0 = nn.BatchNorm1d(100)
+        self.fc1 = nn.Linear(100, 50)
+        self.bn1 = nn.BatchNorm1d(50)
+        self.fc2 = nn.Linear(50, 10)
+        self.bn2 = nn.BatchNorm1d(10)
+
+    def forward(self, x):
+        x = x.view(-1, self.image_size)
+        x = F.relu(self.bn0(self.fc0(x)))
+        x = F.relu(self.bn1(self.fc1(x)))
+        x = (self.bn2(self.fc2(x)))
+        return F.log_softmax(x, dim=1)
+
 
 class ModelE(nn.Module):
     def __init__(self, image_size):
@@ -187,6 +234,31 @@ class ModelE(nn.Module):
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
         x = (self.fc5(x))
+        return F.log_softmax(x, dim=1)
+
+
+class ModelF(nn.Module):
+    def __init__(self, image_size):
+        super(ModelF, self).__init__()
+        self.image_size = image_size
+        self.fc0 = nn.Linear(image_size, 128)
+        self.fc1 = nn.Linear(128, 64)
+        self.fc2 = nn.Linear(64, 10)
+        self.fc3 = nn.Linear(10, 10)
+        self.fc4 = nn.Linear(10, 10)
+        self.fc5 = nn.Linear(10, 10)
+        self.drop_layer = nn.Dropout(p=0.6)
+
+
+    def forward(self, x):
+        x = x.view(-1, self.image_size)
+        x = torch.sigmoid(self.fc0(x))
+        x = torch.sigmoid(self.fc1(x))
+        x = torch.sigmoid(self.fc2(x))
+        x = torch.sigmoid(self.fc3(x))
+        x = torch.sigmoid(self.fc4(x))
+        x = (self.fc5(x))
+        self.drop_layer(x)
         return F.log_softmax(x, dim=1)
 
 if __name__ == '__main__':
