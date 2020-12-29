@@ -12,13 +12,17 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import datasets
 
 
+MAX_EPOCH = 10
+IMAGE_SIZE = 28 * 28
+
+
 # todo change name of function and remove redundant print
 def main():
-    train_loader, val_loader = load()
-    loss_train = {}
-    loss_val = {}
-    acc_train = {}
-    acc_val = {}
+    # train_loader, val_loader = load()
+    # loss_train = {}
+    # loss_val = {}
+    # acc_train = {}
+    # acc_val = {}
     # todo add loss average
     """
     #modelA
@@ -41,14 +45,14 @@ def main():
         validate(model, val_loader)
         """
     #modelC
-    print("************C**************")
-    model = ModelC(28*28)
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
-    for e in range(10):
-        print(e)
-        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
-        loss_val[e], acc_val[e] = validate(model, val_loader)
-        """
+    # print("************C**************")
+    # model = ModelC(28*28)
+    # optimizer = optim.SGD(model.parameters(), lr=0.01)
+    # for e in range(2):
+    #     print(e)
+    #     loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+    #     loss_val[e], acc_val[e] = validate(model, val_loader)
+    """
     # modelD
     print("************D**************")
     model = ModelD(28 * 28)
@@ -75,10 +79,97 @@ def main():
         train(model, optimizer, train_loader)
         validate(model, val_loader)
     """
+    # loss_graphs(loss_train, loss_val)
+    # acc_graphs(acc_train, acc_val)
+
+    # create_test_y(model)
+    create_report()
+    print("done")
+
+
+def create_report():
+    train_loader, val_loader = load()
+    loss_train = {}
+    loss_val = {}
+    acc_train = {}
+    acc_val = {}
+
+    """
+    # modelA
+    print("************A**************")
+    model = ModelA(28 * 28)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+    
+    # model B
+    print("************B**************")
+    model = ModelB(28 * 28)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+        
+    # model C
+    print("************C**************")
+    model = ModelC(28*28)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(2):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+        
+    # modelD
+    print("************D**************")
+    model = ModelD(28 * 28)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+        
+    # modelE
+    print("************E**************")
+    model = ModelE(28 * 28)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    for e in range(10):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+
+    # modelF
+    print("************F**************")
+    model = ModelF(28 * 28)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
+        loss_val[e], acc_val[e] = validate(model, val_loader)
+    """
+    # Part 1 - plot average loss
     loss_graphs(loss_train, loss_val)
+
+    # Part 2 - plot accuracy
     acc_graphs(acc_train, acc_val)
 
-    test_x = sys.argv[1]
+    # Part 3 - Test set accuracy
+    model = ModelA(IMAGE_SIZE)
+    transforms = tr.Compose([tr.ToTensor(),
+                             tr.Normalize((0.1307,), (0.3081,))])
+    test_loader = torch.utils.data.DataLoader(
+        datasets.FashionMNIST('./data', train=False, transform=transforms, download=True), batch_size=64, shuffle=True)
+    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    for e in range(10):
+        print(e)
+        train(model, optimizer, train_loader)
+        validate(model, test_loader)
+
+
+def create_test_y(model):
+    test_x = sys.argv[3]
     test_x = np.loadtxt(test_x)
     test_x /= 255.0
     test_x = tr.Compose([tr.ToTensor()])(test_x)[0].float()
@@ -89,7 +180,11 @@ def main():
         file.write(str(pred) + '\n')
     file.close()
 
-    print("done")
+
+def run_model(model, optimizer, train_loader, val_loader):
+    for epoch in range(MAX_EPOCH):
+        train(model, optimizer, train_loader)
+        validate(model, val_loader)
 
 
 def loss_graphs(avg_train_loss, avg_validation_loss):
@@ -99,6 +194,7 @@ def loss_graphs(avg_train_loss, avg_validation_loss):
                       label='Validation average Loss')
     plt.legend(handler_map={line1: HandlerLine2D(numpoints=4), line2: HandlerLine2D(numpoints=4)})
     plt.show()
+
 
 def acc_graphs(avg_acc_train, avg_acc_validation):
     line1, = plt.plot(list(avg_acc_train.keys()), list(avg_acc_train.values()), "blue",
@@ -111,10 +207,10 @@ def acc_graphs(avg_acc_train, avg_acc_validation):
 
 def validate(model, val_loader):
     model.eval()
-    correct=0
-    loss=0
+    correct = 0
+    # loss=0
     train_loss = 0
-    for data, labels in (val_loader):
+    for data, labels in val_loader:
         labels = labels.type(torch.LongTensor)
         output = model(data)
         train_loss += F.nll_loss(output, labels)
@@ -122,42 +218,46 @@ def validate(model, val_loader):
         correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
     train_loss /= (len(val_loader.dataset))
     acc = 100. * correct / len(val_loader.dataset)
+    # todo remove print
     print('\nval set: Average loss: {:.4f}, Accuracy: {} / {}({:.0f} % )\n'.format(
-    train_loss, correct, len(val_loader.dataset),
-    100. * correct / len(val_loader.dataset)))
-    return  train_loss, acc
+            train_loss, correct, len(val_loader.dataset),
+            100. * correct / len(val_loader.dataset)))
+    return train_loss, acc
+
 
 def train(model, optimizer, train_loader):
-        sum_loss = 0
-        correct = 0
-        train_loss = 0
-        model.train()
-        for batch_idx, (data, labels) in enumerate(train_loader):
-            #
-            labels = labels.type(torch.LongTensor)
-            #
-            optimizer.zero_grad()
-            output = model(data)
-            loss = F.nll_loss(output, labels)
-            loss.backward()
-            optimizer.step()
-            #chek our train
-            train_loss+=loss
-            pred =output.max(1, keepdim=True)[1]
-            correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
+    # sum_loss = 0
+    correct = 0
+    train_loss = 0
+    model.train()
+    for batch_idx, (data, labels) in enumerate(train_loader):
+        #
+        labels = labels.type(torch.LongTensor)
+        #
+        optimizer.zero_grad()
+        output = model(data)
+        loss = F.nll_loss(output, labels)
+        loss.backward()
+        optimizer.step()
+        # chek our train
+        train_loss += loss
+        pred = output.max(1, keepdim=True)[1]
+        correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
 
-        train_loss /= (len(train_loader))
-        acc= 100. * correct / len(train_loader.dataset)
+    train_loss /= (len(train_loader))
+    acc = 100. * correct / len(train_loader.dataset)
 
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {} / {}({:.0f} % )\n'.format(
-        train_loss, correct, len(train_loader.dataset),
-        100. * correct / len(train_loader.dataset)))
-        return train_loss, acc
+    # todo remove print
+    print('\nTrain set: Average loss: {:.4f}, Accuracy: {} / {}({:.0f} % )\n'.format(
+            train_loss, correct, len(train_loader.dataset),
+            100. * correct / len(train_loader.dataset)))
+
+    return train_loss, acc
 
 
 def load():
-    train_x = np.loadtxt("train_x")
-    train_y = np.loadtxt("train_y")
+    train_x = np.loadtxt(sys.argv[1])
+    train_y = np.loadtxt(sys.argv[2])
     # split train file to validation and train:
     size_train = int(len(train_x) * 0.2)
     validation_x = train_x[-size_train:, :]
@@ -168,6 +268,8 @@ def load():
     # todo - check the avg and change it
     transforms = tr.Compose([tr.ToTensor(),
                             tr.Normalize((0.1307,), (0.3081,))])
+    # transforms = tr.Compose([tr.ToTensor(),
+    #                          tr.Normalize((np.mean(train_x)), np.std(train_x))])
     # train data
     train_data = FashionData(train_x, train_y, transforms)
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
@@ -211,6 +313,7 @@ class ModelA(nn.Module):
         x = (self.fc2(x))
         return F.log_softmax(x, dim=1)
 
+
 class ModelB(nn.Module):
     def __init__(self, image_size):
         super(ModelB, self).__init__()
@@ -225,6 +328,7 @@ class ModelB(nn.Module):
         x = F.relu(self.fc1(x))
         x = (self.fc2(x))
         return F.log_softmax(x, dim=1)
+
 
 class ModelC(nn.Module):
     def __init__(self, image_size):
@@ -274,7 +378,6 @@ class ModelE(nn.Module):
         self.fc4 = nn.Linear(10, 10)
         self.fc5 = nn.Linear(10, 10)
 
-
     def forward(self, x):
         x = x.view(-1, self.image_size)
         x = F.relu(self.fc0(x))
@@ -298,7 +401,6 @@ class ModelF(nn.Module):
         self.fc5 = nn.Linear(10, 10)
         self.drop_layer = nn.Dropout(p=0.6)
 
-
     def forward(self, x):
         x = x.view(-1, self.image_size)
         x = torch.sigmoid(self.fc0(x))
@@ -309,6 +411,7 @@ class ModelF(nn.Module):
         x = (self.fc5(x))
         self.drop_layer(x)
         return F.log_softmax(x, dim=1)
+
 
 if __name__ == "__main__":
     main()
