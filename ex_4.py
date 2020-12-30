@@ -16,19 +16,19 @@ MAX_EPOCH = 10
 IMAGE_SIZE = 28 * 28
 
 
-# todo change name of function and remove redundant print
 def main():
     train_loader = load_for_testing()
 
     # todo choose best model
-    model = ModelC(IMAGE_SIZE)
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
-    for epoch in range(MAX_EPOCH):
-        train(model, optimizer, train_loader)
+    # model = ModelE(IMAGE_SIZE)
+    # optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # for epoch in range(MAX_EPOCH):
+    #     train(model, optimizer, train_loader)
 
-    create_test_y(model)
+    # create_test_y(model)
 
-    # create_report()
+    # todo to comment before submit
+    create_report()
 
     print("done")
 
@@ -39,7 +39,6 @@ def create_report():
     loss_val = {}
     acc_train = {}
     acc_val = {}
-
     """
     # modelA
     print("************A**************")
@@ -58,16 +57,16 @@ def create_report():
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-        
+    
     # model C
     print("************C**************")
     model = ModelC(IMAGE_SIZE)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
-    for e in range(2):
+    for e in range(MAX_EPOCH):
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-        
+    
     # modelD
     print("************D**************")
     model = ModelD(IMAGE_SIZE)
@@ -76,7 +75,7 @@ def create_report():
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-        
+    
     # modelE
     print("************E**************")
     model = ModelE(IMAGE_SIZE)
@@ -85,7 +84,7 @@ def create_report():
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-
+    """
     # modelF
     print("************F**************")
     model = ModelF(IMAGE_SIZE)
@@ -94,7 +93,7 @@ def create_report():
         print(e)
         loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
         loss_val[e], acc_val[e] = validate(model, val_loader)
-    """
+
     # Part 1 - plot average loss
     loss_graphs(loss_train, loss_val)
 
@@ -102,12 +101,12 @@ def create_report():
     acc_graphs(acc_train, acc_val)
 
     # Part 3 - Test set accuracy
-    model = ModelA(IMAGE_SIZE)
+    model = ModelF(IMAGE_SIZE)
     transforms = tr.Compose([tr.ToTensor(),
                              tr.Normalize((0.1307,), (0.3081,))])
     test_loader = torch.utils.data.DataLoader(
         datasets.FashionMNIST('./data', train=False, transform=transforms, download=True), batch_size=64, shuffle=True)
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
         train(model, optimizer, train_loader)
@@ -211,7 +210,6 @@ def load_for_report():
     train_x = train_x[: -size_train, :]
     train_y = train_y[: -size_train]
 
-    # todo - check the avg and change it
     transforms = tr.Compose([tr.ToTensor(),
                             tr.Normalize((0.1307,), (0.3081,))])
     # transforms = tr.Compose([tr.ToTensor(),
