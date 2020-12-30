@@ -18,77 +18,23 @@ IMAGE_SIZE = 28 * 28
 
 # todo change name of function and remove redundant print
 def main():
-    # train_loader, val_loader = load()
-    # loss_train = {}
-    # loss_val = {}
-    # acc_train = {}
-    # acc_val = {}
-    # todo add loss average
-    """
-    #modelA
-    print("************A**************")
-    model = ModelA(28*28)
-    optimizer = optim.SGD(model.parameters(), lr=0.01)
-    for e in range(10):
-        print(e)
-        loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
-        loss_val[e], acc_val[e] = validate(model, val_loader)
+    train_loader = load_for_testing()
 
-    
-    # model B
-    print("************B**************")
-    model = ModelB(28 * 28)
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
-    for e in range(10):
-        print(e)
-        train(model, optimizer, train_loader)
-        validate(model, val_loader)
-        """
-    #modelC
-    # print("************C**************")
-    # model = ModelC(28*28)
-    # optimizer = optim.SGD(model.parameters(), lr=0.01)
-    # for e in range(2):
-    #     print(e)
-    #     loss_train[e], acc_train[e] = train(model, optimizer, train_loader)
-    #     loss_val[e], acc_val[e] = validate(model, val_loader)
-    """
-    # modelD
-    print("************D**************")
-    model = ModelD(28 * 28)
+    # todo choose best model
+    model = ModelC(IMAGE_SIZE)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
-    for e in range(10):
-        print(e)
+    for epoch in range(MAX_EPOCH):
         train(model, optimizer, train_loader)
-        validate(model, val_loader)
-    #modelE
-    print("************E**************")
-    model = ModelE(28*28)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    for e in range(10):
-        print(e)
-        train(model, optimizer, train_loader)
-        validate(model, val_loader)
-    
-    # modelF
-    print("************F**************")
-    model = ModelF(28 * 28)
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
-    for e in range(10):
-        print(e)
-        train(model, optimizer, train_loader)
-        validate(model, val_loader)
-    """
-    # loss_graphs(loss_train, loss_val)
-    # acc_graphs(acc_train, acc_val)
 
-    # create_test_y(model)
-    create_report()
+    create_test_y(model)
+
+    # create_report()
+
     print("done")
 
 
 def create_report():
-    train_loader, val_loader = load()
+    train_loader, val_loader = load_for_report()
     loss_train = {}
     loss_val = {}
     acc_train = {}
@@ -97,7 +43,7 @@ def create_report():
     """
     # modelA
     print("************A**************")
-    model = ModelA(28 * 28)
+    model = ModelA(IMAGE_SIZE)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
@@ -106,7 +52,7 @@ def create_report():
     
     # model B
     print("************B**************")
-    model = ModelB(28 * 28)
+    model = ModelB(IMAGE_SIZE)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
@@ -115,7 +61,7 @@ def create_report():
         
     # model C
     print("************C**************")
-    model = ModelC(28*28)
+    model = ModelC(IMAGE_SIZE)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     for e in range(2):
         print(e)
@@ -124,7 +70,7 @@ def create_report():
         
     # modelD
     print("************D**************")
-    model = ModelD(28 * 28)
+    model = ModelD(IMAGE_SIZE)
     optimizer = optim.SGD(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
@@ -133,7 +79,7 @@ def create_report():
         
     # modelE
     print("************E**************")
-    model = ModelE(28 * 28)
+    model = ModelE(IMAGE_SIZE)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     for e in range(10):
         print(e)
@@ -142,7 +88,7 @@ def create_report():
 
     # modelF
     print("************F**************")
-    model = ModelF(28 * 28)
+    model = ModelF(IMAGE_SIZE)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     for e in range(10):
         print(e)
@@ -255,7 +201,7 @@ def train(model, optimizer, train_loader):
     return train_loss, acc
 
 
-def load():
+def load_for_report():
     train_x = np.loadtxt(sys.argv[1])
     train_y = np.loadtxt(sys.argv[2])
     # split train file to validation and train:
@@ -277,6 +223,17 @@ def load():
     validation_data = FashionData(validation_x, validation_y, transforms)
     val_loader = torch.utils.data.DataLoader(validation_data, shuffle=True)
     return train_loader, val_loader
+
+
+def load_for_testing():
+    train_x = np.loadtxt(sys.argv[1])
+    train_y = np.loadtxt(sys.argv[2])
+    transforms = tr.Compose([tr.ToTensor(),
+                             tr.Normalize((0.1307,), (0.3081,))])
+    # train data
+    train_data = FashionData(train_x, train_y, transforms)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)
+    return train_loader
 
 
 class FashionData(Dataset):
